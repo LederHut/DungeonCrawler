@@ -71,6 +71,7 @@ private:
 	void UpdateGraphicWindows();
 
 	void DoMenuWindowInput(MenuWindow*, bool*);
+	void DoGraphicWindowInput(GraphicWindow*, bool*);
 
 	void SetOutBuffer(OutBuffer, SMALL_RECT, const unsigned, const unsigned);
 	void ProccesKeyInput(KEY_EVENT_RECORD, bool*);

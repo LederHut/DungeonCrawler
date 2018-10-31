@@ -165,6 +165,10 @@ void ConsoleHandling::UpdateMenuWindows()
 
 void ConsoleHandling::UpdateGraphicWindows()
 {
+	bool pressedkeys[26];
+
+	std::copy(PressedKeys, PressedKeys + 26, pressedkeys);
+
 	for (auto i = pGraphicWindows.begin(); i != pGraphicWindows.end(); i++)
 	{
 		GraphicWindow* gw(*i);
@@ -173,22 +177,27 @@ void ConsoleHandling::UpdateGraphicWindows()
 
 		if (wi->Active)
 		{
+			DoGraphicWindowInput(gw,pressedkeys);
+
 			SetOutBuffer(wi->MainOutBuffer,
 						 wi->OuterDimensions,
 						 wi->OuterLength,
 						 wi->OuterHeigth);
 
-			SetOutBuffer(wi->SecondOutBuffer,
+			SetOutBuffer(wi->SecondOutBuffer, 
 						 wi->InnerDimensions,
 						 wi->InnerLength,
 						 wi->InnerHeigth);
+
+			wi->SecondOutBuffer = "";
+			wi->SecondOutBuffer.resize(wi->InnerHeigth * wi->InnerLength,' ');
 		}
 		else { return; }
 
 	}
 }
 
-//FIX: Somthing is still wrong with the way this gets input
+//FIX: Somthing is still wrong with the way this gets input maybe.
 //FIX: Using the same Identifier on differnt menuwindows (as long the same Identifier isn't schown on screen Identifier can be used more then once)
 //     doesn't quite work. 
 void ConsoleHandling::DoMenuWindowInput(MenuWindow* thismw, bool* pressedkeys) 
@@ -226,17 +235,50 @@ void ConsoleHandling::DoMenuWindowInput(MenuWindow* thismw, bool* pressedkeys)
 	}
 }
 
+void ConsoleHandling::DoGraphicWindowInput(GraphicWindow* gw, bool* pressedkeys)
+{
+	Player* player(gw->GetPlayer());
+
+	SMALL_RECT* sm(player->GetPToDimensions());
+
+	WINDOW_INFORMATION* wi(gw->GetWinInfo());
+
+	if (Utility::IsKeyPressed('w',pressedkeys))
+	{
+		sm->Top--;
+	}
+	else if (Utility::IsKeyPressed('a',pressedkeys))
+	{
+		sm->Left--;
+	}
+	else if (Utility::IsKeyPressed('s', pressedkeys))
+	{
+		sm->Top++;
+	}
+	else if (Utility::IsKeyPressed('d', pressedkeys))
+	{
+		sm->Left++;
+	}
+
+	Utility::SetOutBuffer(wi->SecondOutBuffer,
+						  wi->InnerLength,
+					 	  player->GetMainOutBuffer(),
+						  player->GetDimensions(),
+						  player->GetLength(),
+						  player->GetHeigth());
+}
+
 void ConsoleHandling::SetOutBuffer(OutBuffer outbuffer, SMALL_RECT destination, unsigned length, unsigned height)
 {
 	std::string temp;
 
 	for (size_t y = 0; y < height; y++)
 	{
-		temp.assign(outbuffer, y * length, length + 1);
+		temp.assign(outbuffer, y * length, length +1);
 
 		for (size_t x = 0; x < temp.length(); x++)
 		{
-			MainOutBuffer[((y + destination.Top) * MAX_X) + x + destination.Left] = temp[x];
+			MainOutBuffer[((y + destination.Top) * MAX_X) + ((x + destination.Left))] = temp[x];
 		}
 		temp.empty();
 	}

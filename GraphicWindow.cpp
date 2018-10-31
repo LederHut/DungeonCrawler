@@ -11,3 +11,8 @@ GraphicWindow::GraphicWindow(std::string title, SMALL_RECT dimensions)
 GraphicWindow::~GraphicWindow()
 {
 }
+
+void GraphicWindow::SetPlayer(Player* player)
+{
+	_Player = player;
+}

@@ -27,8 +27,8 @@ constexpr char ALPHABET[26] = { 'a','b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
 struct WINDOW_INFORMATION
 {
 
-	OutBuffer MainOutBuffer, //TODO: wirte a overide for the -> operator to sync the second and main buffer on use.
-			  SecondOutBuffer;
+	OutBuffer MainOutBuffer,
+		      SecondOutBuffer; //TODO: wirte a overide for the -> operator to sync the second and main buffer on use.
 
 	SMALL_RECT OuterDimensions,
 			   InnerDimensions;
@@ -47,15 +47,15 @@ struct WINDOW_INFORMATION
 		 Title(title),
 		 Active(active)
 	{
-		InnerDimensions.Top = OuterDimensions.Top + 2;
+		InnerDimensions.Top = OuterDimensions.Top + 1;
 		InnerDimensions.Left = OuterDimensions.Left + 1;
 		InnerDimensions.Bottom = OuterDimensions.Bottom - 1;
 		InnerDimensions.Right = OuterDimensions.Right - 1;
 
-		InnerLength = InnerDimensions.Right - InnerDimensions.Left;
-		InnerHeigth = InnerDimensions.Bottom - InnerDimensions.Top;
 		OuterLength = OuterDimensions.Right - OuterDimensions.Left;
 		OuterHeigth = OuterDimensions.Bottom - OuterDimensions.Top;
+		InnerLength = InnerDimensions.Right - InnerDimensions.Left;
+		InnerHeigth = InnerDimensions.Bottom - InnerDimensions.Top;
 
 		MainOutBuffer.resize(OuterDimensions.Bottom * OuterDimensions.Right, ' ');
 		SecondOutBuffer.resize(InnerDimensions.Bottom * InnerDimensions.Right, ' ');
@@ -162,17 +162,24 @@ namespace Utility
 		}
 		outbuffer = temp;
 	}
-	static void SetOutBuffer(OutBuffer &outbuffer, unsigned bufferlength, std::string str, SMALL_RECT destination, unsigned length, unsigned height)
+
+	static void SetOutBuffer(OutBuffer &outbufferdes,
+							 unsigned bufferdeslength,
+							 OutBuffer frombuffer,
+							 SMALL_RECT frombufferdestination,
+							 unsigned frombufferlength,
+							 unsigned frombufferheight)
 	{
-		for (size_t y = 0; y < height; y++)
+		for (size_t y = 0; y < frombufferheight; y++)
 		{
-			for (size_t x = 0; x < length; x++)
+			for (size_t x = 0; x < frombufferlength; x++)
 			{
-				outbuffer[((y + destination.Top) * bufferlength) + (x + destination.Left)] = str[x];
+				outbufferdes[((y + frombufferdestination.Top) * bufferdeslength) + (x + frombufferdestination.Left)] = frombuffer[x];
 			}
 		}
 
 	}
+
 	static bool IsKeyPressed(char character, bool* pressedkeys) 
 	{
 		switch (character)
@@ -364,6 +371,7 @@ namespace Utility
 
 		}
 	}
+
 	static STATIC_TEXT ToStaticText(std::vector<bool> data)
 	{
 		STATIC_TEXT st;

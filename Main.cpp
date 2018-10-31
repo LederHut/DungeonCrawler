@@ -6,6 +6,7 @@
 #include "GraphicWindow.h"
 #include "ConsoleHandling.h"
 #include "MenuElement.h"
+#include "Player.h"
 
 SMALL_RECT  temp = { 80,5 , 120,15 },		// {x,y , x,y} or {Left,Top , Right,Bottom}
 			temps = { 0,0 , 12,20 },
@@ -14,21 +15,23 @@ SMALL_RECT  temp = { 80,5 , 120,15 },		// {x,y , x,y} or {Left,Top , Right,Botto
 std::string Map = { "123456712345671234567" };
 
 //Entity ent("option", tempsss, MENU_ELEMENT, 0 , "a"),
-//	   player("P", tempsss, IN_GAME_OBJECT),
-//	   map(Map, tempsss, MAP);
+//	     player("P", tempsss, IN_GAME_OBJECT),
+//	     map(Map, tempsss, MAP);
 
 ConsoleHandling chWindow;
 
 int main()
-{
+{ 
+	Player _player({ 10,5 , 0,0 },"@",1);
+
 	TextWindow textwindow("Mordor", temps),
 			   _textwindow("Son", { 13,0 , 25,12 });
 
 	GraphicWindow graphicwindow("Game", tempss);
-
+	graphicwindow.SetPlayer(&_player);
 
 	MenuElement _menuelement({ 1,2 , 0,0 }, "b", "backward"),
-				menuelement({ 1,2 , 0,0 }, "f", "forward"),
+				menuelement({ 0,2 , 0,0 }, "f", "forward"),
 				MeToMenu_F({ 1,2 , 0,0 },"o","ToMenu_F"),
 				MeToMenu_B({ 13,2 , 0,0 },"k","ToMenu_B"),
 				test({ 1,4 , 0,0 },"l","Open_LORD");
@@ -67,14 +70,17 @@ int main()
 
 	chWindow.AddWindow(&graphicwindow);
 
+	unsigned i(0);
+
 	while (true)
 	{
 		chWindow.Update();
-	
-		_textwindow.WriteText("RISE!!!");
 
-		Sleep(50);
+		textwindow.WriteText(std::to_string(sizeof(_menuwindow)) + ".bytes");
 
+		Sleep(100);
+
+		i++;
 	}
 
 	//Cleanup

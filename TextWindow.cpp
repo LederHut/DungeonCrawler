@@ -6,6 +6,7 @@ TextWindow::TextWindow(std::string title, SMALL_RECT dimensions)
 	:WinInfo(title,dimensions),
 	 TextHistory(0)
 {
+	WinInfo.InnerDimensions.Top - 1;
 	Utility::DoBorder(WinInfo.Title, WinInfo.MainOutBuffer , WinInfo.OuterDimensions);
 }
 
@@ -40,23 +41,20 @@ void TextWindow::WriteStaticText(STATIC_TEXT st)
 }
 void TextWindow::DoText(std::string text) //FIX: Stackoverflow when outputing to long string for the textwindow to show.
 {
-	unsigned z(0),
-			 t(0);
+	unsigned z(0);
 
-	float f(0.0f);
-
-	std::string str = "> ";
+	std::string str("> ");
 	str.append(text);
 
 	StringLengthHistory.push_back(str.length());
 	
-	if (WinInfo.InnerHeigth - 1 > (unsigned)((float)TextHistory + (float)str.length() / (float)WinInfo.InnerLength))
+	if (WinInfo.InnerHeigth > (unsigned)((float)TextHistory + (float)str.length() / (float)WinInfo.InnerLength))
 	{
 		for (; z < str.length(); TextHistory++)
 		{
 			for (size_t x = 0; x <  WinInfo.InnerLength;)
 			{
-				WinInfo.SecondOutBuffer[(TextHistory * WinInfo.InnerLength +1) + x] = str[z];
+				WinInfo.SecondOutBuffer[(TextHistory * WinInfo.InnerLength) + x] = str[z];
 				if (z < str.length())
 				{
 					x++;
@@ -73,13 +71,13 @@ void TextWindow::DoText(std::string text) //FIX: Stackoverflow when outputing to
 	}
 	else
 	{
-		unsigned temp((unsigned)((float)StringLengthHistory[0] / (float)WinInfo.InnerLength));
+		unsigned textheigth((unsigned)((float)StringLengthHistory[0] / (float)WinInfo.InnerLength));
 
-		WinInfo.SecondOutBuffer.erase(0, WinInfo.InnerLength * (temp == 0 ? 1 : temp));
+		WinInfo.SecondOutBuffer.erase(0, WinInfo.InnerLength * (textheigth == 0 ? 1 : textheigth));
 		WinInfo.SecondOutBuffer.resize(WinInfo.InnerDimensions.Bottom * WinInfo.InnerDimensions.Right, ' ');
 		
 
-		TextHistory -= temp == 0 ? 1 : temp;
+		TextHistory -= textheigth == 0 ? 1 : textheigth;
 
 		StringLengthHistory.erase(StringLengthHistory.begin());
 

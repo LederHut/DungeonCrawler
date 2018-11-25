@@ -6,7 +6,6 @@ TextWindow::TextWindow(std::string title, SMALL_RECT dimensions)
 	:WinInfo(title,dimensions),
 	 TextHistory(0)
 {
-	WinInfo.InnerDimensions.Top - 1;
 	Utility::DoBorder(WinInfo.Title, WinInfo.MainOutBuffer , WinInfo.OuterDimensions);
 }
 
@@ -39,7 +38,10 @@ void TextWindow::WriteStaticText(STATIC_TEXT st)
 {
 	DoLine(st);
 }
-void TextWindow::DoText(std::string text) //FIX: Stackoverflow when outputing to long string for the textwindow to show.
+
+//FIX: Stackoverflow when outputing to long string for the textwindow to show.
+//FIX: Calling the WriteText func twice in the same loop will kinda break the text output.
+void TextWindow::DoText(std::string text) 
 {
 	unsigned z(0);
 

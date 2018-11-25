@@ -3,7 +3,7 @@
 
 
 Player::Player(SMALL_RECT pos, std::string indentifier, bool b)
-	:Entitys(pos)
+	:Entity(pos)
 {
 	SetActive(b);
 

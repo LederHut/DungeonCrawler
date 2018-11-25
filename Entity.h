@@ -4,44 +4,30 @@
 
 class Entity
 {
-private:
-
+	int test;
+protected:
 	
 	OutBuffer MainOutBuffer;
 
-	std::string Indentifier;
+	SMALL_RECT Dimensions;
 
-	unsigned OuterLength,
-			 OuterHeigth,
-			 InnerLength,
-			 InnerHeigth,
-		     Color;
+	unsigned int Length,
+				 Heigth;
 
-	bool Active;
-
-	SMALL_RECT OuterDimensions,
-			   InnerDimensions;
-
-	std::vector<ON_KEY_PRESS_CALLBACK_FUNC> CallBackFun;
-
+	bool Active{ 0 };
 
 public:
 
-	Entity();
-	Entity(OutBuffer, SMALL_RECT, FLAG, unsigned color = 0, std::string identifier = " ");
-		
+	Entity(SMALL_RECT);
 	~Entity();
-	inline void AddCallback(ON_KEY_PRESS_CALLBACK_FUNC cbfun) { CallBackFun.push_back(cbfun); }
+
+	inline void SetActive(bool b) { Active = b; }
 
 	inline OutBuffer GetMainOutBuffer() { return MainOutBuffer; }
-	inline SMALL_RECT GetOuterDimensions() { return OuterDimensions; }
-	inline SMALL_RECT GetInnerDimensions() { return InnerDimensions; }
-	inline unsigned GetInnerHeigth() { return InnerHeigth; }
-	inline unsigned GetInnerLength() { return InnerLength; }
-	inline unsigned GetOuterHeigth() { return OuterHeigth; }
-	inline unsigned GetOuterLength() { return OuterLength; }
-	inline unsigned GetColor() { return Color; }
-	inline std::vector<ON_KEY_PRESS_CALLBACK_FUNC> GetCallback() { return CallBackFun; }
+	inline SMALL_RECT GetDimensions() { return Dimensions; }
+	inline unsigned GetHeigth() { return Heigth; }
+	inline unsigned GetLength() { return Length; }
+	inline bool* GetPToActive() { return &Active; }
 
 private:
 

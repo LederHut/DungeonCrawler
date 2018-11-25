@@ -1,7 +1,7 @@
 #pragma once
-#include "Entitys.h"
+#include "Entity.h"
 
-class MenuElement : public Entitys
+class MenuElement : public Entity
 {
 private:
 
@@ -13,7 +13,7 @@ public:
 
 	void SetNextWindow(void*);
 
-	MenuElement(SMALL_RECT dimensoins, const std::string indentifier, OutBuffer titel);
+	MenuElement(OutBuffer titel, const std::string indentifier, SMALL_RECT dimensoins);
 	~MenuElement();
 
 	inline std::string GetIdentifier() { return Identifier; }
@@ -24,4 +24,3 @@ private:
 
 
 };
-

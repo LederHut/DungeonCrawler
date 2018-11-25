@@ -117,15 +117,16 @@ void ConsoleHandling::UpdateTextWindows()
 
 		if (wi->Active)
 		{
-			SetOutBuffer(wi->MainOutBuffer,
+			SetMainBuffer(wi->MainOutBuffer,
 						 wi->OuterDimensions,
 						 wi->OuterLength,
 						 wi->OuterHeigth);
 
-			SetOutBuffer(wi->SecondOutBuffer,
+			SetMainBuffer(wi->SecondOutBuffer,
 						 wi->InnerDimensions,
 						 wi->InnerLength,
-						 wi->InnerHeigth);
+						 wi->InnerHeigth,
+						 0);
 		}
 		else { return; }
 	}
@@ -145,15 +146,16 @@ void ConsoleHandling::UpdateMenuWindows()
 
 		if (wi->Active)
 		{
-			SetOutBuffer(wi->MainOutBuffer,
+			SetMainBuffer(wi->MainOutBuffer,
 						 wi->OuterDimensions,
 						 wi->OuterLength,
 						 wi->OuterHeigth);
 
-			SetOutBuffer(wi->SecondOutBuffer,
+			SetMainBuffer(wi->SecondOutBuffer,
 						 wi->InnerDimensions,
 						 wi->InnerLength,
-						 wi->InnerHeigth);
+						 wi->InnerHeigth,
+						 0);
 
 			DoMenuWindowInput(mw,pressedkeys);
 		}
@@ -179,15 +181,16 @@ void ConsoleHandling::UpdateGraphicWindows()
 		{
 			DoGraphicWindowInput(gw,pressedkeys);
 
-			SetOutBuffer(wi->MainOutBuffer,
+			SetMainBuffer(wi->MainOutBuffer,
 						 wi->OuterDimensions,
 						 wi->OuterLength,
 						 wi->OuterHeigth);
 
-			SetOutBuffer(wi->SecondOutBuffer, 
+			SetMainBuffer(wi->SecondOutBuffer,
 						 wi->InnerDimensions,
 						 wi->InnerLength,
-						 wi->InnerHeigth);
+						 wi->InnerHeigth,
+						 0);
 
 			wi->SecondOutBuffer = "";
 			wi->SecondOutBuffer.resize(wi->InnerHeigth * wi->InnerLength,' ');
@@ -201,7 +204,7 @@ void ConsoleHandling::UpdateGraphicWindows()
 //FIX: Using the same Identifier on differnt menuwindows (as long the same Identifier isn't schown on screen Identifier can be used more then once)
 //     doesn't quite work. 
 void ConsoleHandling::DoMenuWindowInput(MenuWindow* thismw, bool* pressedkeys) 
-{																			 	
+{
 	std::vector<MenuElement*> thismes(thismw->GetMenuElements());
 
 	WINDOW_INFORMATION* thiswi(thismw->GetWinInfo());
@@ -222,15 +225,16 @@ void ConsoleHandling::DoMenuWindowInput(MenuWindow* thismw, bool* pressedkeys)
 
 		if (nextwi->Active)
 		{
-			SetOutBuffer(nextwi->MainOutBuffer,
+			SetMainBuffer(nextwi->MainOutBuffer,
 						 nextwi->OuterDimensions,
 						 nextwi->OuterLength,
 						 nextwi->OuterHeigth);
 
-			SetOutBuffer(nextwi->SecondOutBuffer,
+			SetMainBuffer(nextwi->SecondOutBuffer,
 						 nextwi->InnerDimensions,
 						 nextwi->InnerLength,
-						 nextwi->InnerHeigth);
+						 nextwi->InnerHeigth,
+						 0);
 		}
 	}
 }
@@ -268,13 +272,13 @@ void ConsoleHandling::DoGraphicWindowInput(GraphicWindow* gw, bool* pressedkeys)
 						  player->GetHeigth());
 }
 
-void ConsoleHandling::SetOutBuffer(OutBuffer outbuffer, SMALL_RECT destination, unsigned length, unsigned height)
+void ConsoleHandling::SetMainBuffer(OutBuffer outbuffer, SMALL_RECT destination, unsigned length, unsigned height, bool ismain)
 {
 	std::string temp;
 
 	for (size_t y = 0; y < height; y++)
 	{
-		temp.assign(outbuffer, y * length, length +1);
+		temp.assign(outbuffer, y * length, length + ismain);
 
 		for (size_t x = 0; x < temp.length(); x++)
 		{
@@ -282,7 +286,6 @@ void ConsoleHandling::SetOutBuffer(OutBuffer outbuffer, SMALL_RECT destination, 
 		}
 		temp.empty();
 	}
-
 }
 
 void ConsoleHandling::ToConsoleOut()

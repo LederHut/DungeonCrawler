@@ -54,7 +54,7 @@ struct WINDOW_INFORMATION
 
 		OuterLength = OuterDimensions.Right - OuterDimensions.Left;
 		OuterHeigth = OuterDimensions.Bottom - OuterDimensions.Top;
-		InnerLength = InnerDimensions.Right - InnerDimensions.Left;
+		InnerLength = InnerDimensions.Right - InnerDimensions.Left + 1;
 		InnerHeigth = InnerDimensions.Bottom - InnerDimensions.Top;
 
 		MainOutBuffer.resize(OuterDimensions.Bottom * OuterDimensions.Right, ' ');
@@ -156,13 +156,15 @@ namespace Utility
 					
 				if (y == 0)
 				{
-					temp.replace((y * length) + 1, title.length(), title);
+					temp.replace((y * length)+1, title.length(), title);
 				}
 			}
 		}
 		outbuffer = temp;
 	}
 
+	// # Set an OutBuffer in the scope of the new OutBuffer.
+	// # Thus the dimensions must be in trems of the new scope.
 	static void SetOutBuffer(OutBuffer &outbufferdes,
 							 unsigned bufferdeslength,
 							 OutBuffer frombuffer,
@@ -170,9 +172,9 @@ namespace Utility
 							 unsigned frombufferlength,
 							 unsigned frombufferheight)
 	{
-		for (size_t y = 0; y < frombufferheight; y++)
+		for (size_t y = 0; y != frombufferheight; y++)
 		{
-			for (size_t x = 0; x < frombufferlength; x++)
+			for (size_t x = 0; x != frombufferlength; x++)
 			{
 				outbufferdes[((y + frombufferdestination.Top) * bufferdeslength) + (x + frombufferdestination.Left)] = frombuffer[x];
 			}

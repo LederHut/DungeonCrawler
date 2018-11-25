@@ -63,7 +63,7 @@ public:
 	inline bool* GetPressedKeys() { return PressedKeys; }
 	inline std::vector<bool> GetActiveEntitys() { return ActiveEntitys; }
 
-private:
+	private:
 
 	
 	void UpdateTextWindows();
@@ -73,7 +73,7 @@ private:
 	void DoMenuWindowInput(MenuWindow*, bool*);
 	void DoGraphicWindowInput(GraphicWindow*, bool*);
 
-	void SetOutBuffer(OutBuffer, SMALL_RECT, const unsigned, const unsigned);
+	void SetMainBuffer(OutBuffer, SMALL_RECT, const unsigned, const unsigned, bool ismain = 1);
 	void ProccesKeyInput(KEY_EVENT_RECORD, bool*);
 	void SetWindow(_COORD);
 	void ConsoleSetup(HANDLE&);

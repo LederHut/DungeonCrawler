@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Utility.h"
-#include "Entity.h"
 #include "Player.h"
 
 class GraphicWindow

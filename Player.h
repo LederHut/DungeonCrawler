@@ -1,7 +1,7 @@
 #pragma once
-#include "Entitys.h"
+#include "Entity.h"
 
-class Player : public Entitys
+class Player : public Entity
 {
 private:
 

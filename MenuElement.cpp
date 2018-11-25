@@ -1,9 +1,9 @@
 #include "MenuElement.h"
 
 
-MenuElement::MenuElement(SMALL_RECT dimensions, const std::string indentifier, OutBuffer titel)
+MenuElement::MenuElement(OutBuffer titel, const std::string indentifier, SMALL_RECT dimensions)
 	:Identifier(indentifier),
-	 Entitys(dimensions)
+	 Entity(dimensions)
 {
 	if (Identifier.length() != 1)
 	{

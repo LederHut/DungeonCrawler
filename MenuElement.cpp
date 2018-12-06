@@ -11,7 +11,7 @@ MenuElement::MenuElement(OutBuffer titel, const std::string indentifier, SMALL_R
 	}
 	MainOutBuffer.append(titel);
 	MainOutBuffer.append(("[" + Identifier + "]"));
-	Length = MainOutBuffer.length();
+	Length = (unsigned int)MainOutBuffer.length();
 	Heigth = 1;
 
 	Dimensions.Right = Dimensions.Left;

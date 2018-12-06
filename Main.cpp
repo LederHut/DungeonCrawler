@@ -7,40 +7,44 @@
 #include "ConsoleHandling.h"
 #include "MenuElement.h"
 #include "Player.h"
+#include "MatrixString.h"
+#include "Input.h"
 
-SMALL_RECT  temp = { 80,5 , 120,15 };		// {x,y , x,y} or {Left,Top , Right,Bottom}
+SMALL_RECT  temp = { 80,20 , 120,30 };		// {x,y , x,y} or {Left,Top , Right,Bottom}
 
 ConsoleHandling chWindow;
 
 int main()
 {	
 	
+	Player player({40,10 , 0,0},"@",FOREGROUND_GREEN | FOREGROUND_INTENSITY,true);
 
-	MenuWindow mw("Thall'akshur", { 20,20 , 60,30 });
+	MenuElement me1("output", "o", { 1,1 , 0,0}),
+				me2("input", "i", { 1,1 , 0,0 }),
+				me3("throughput","n", { 1,2 , 0,0 });
 
-	MenuWindow mwe("Thall'akshur", { 20,20 , 60,30 });
+	MenuWindow tw("input",temp,0);
+	tw.AddMenuElement(&me1);
+	me2.SetNextWindow(&tw);
+	me3.SetNextWindow(&tw);
 
-	MenuElement mes("SAWAS", "n", { 5,0 , 0,0 });
-	mes.SetNextWindow(&mw);
-	mwe.AddMenuElement(&mes);
+	MenuWindow mw("output", temp);
+	mw.AddMenuElement(&me3);
+	mw.AddMenuElement(&me2);
+	me1.SetNextWindow(&mw);
 
-	MenuElement me("NEXT", "n", { 0,0 , 0,0 });
-	me.SetNextWindow(&mwe);
-	mw.AddMenuElement(&me);
+	GraphicWindow gw("Titan",{ 10,5 , 110,35 });
+	gw.SetPlayer(&player);
 
-	TextWindow txtwin("Moras'vankas", temp);
-
-	chWindow.AddWindow(&mwe);
-	chWindow.AddWindow(&mw);
-	chWindow.AddWindow(&txtwin);
+	//chWindow.AddWindow(&mw);
+	//chWindow.AddWindow(&tw);
+	chWindow.AddWindow(&gw);
 
 	while (true)
 	{
 		chWindow.Update();
 
-		txtwin.WriteText("Naskor");
-
-		//Sleep(100);
+		Sleep(50);
 	}
 
 	//Cleanup

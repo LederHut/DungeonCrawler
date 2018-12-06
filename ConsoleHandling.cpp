@@ -7,9 +7,6 @@ ConsoleHandling::ConsoleHandling()
 	 dwSize				(MAX_X * MAX_Y),
 	 bState				(1),
 	 RecordsRead		(0),
-	 LastMenuWindow		(&bPlaceHolder),
-	 LastMenuElement    (&bPlaceHolder),
-	 NextMenuWindow     (0),
 	
 	 hConsoleOut		(GetStdHandle(STD_OUTPUT_HANDLE)),
 	 _hConsoleOut		(GetStdHandle(STD_OUTPUT_HANDLE)),
@@ -26,6 +23,7 @@ ConsoleHandling::ConsoleHandling()
 	ConsoleSetup(hConsoleOut);
 	SetWindow(ConsoleDimension);
 	SetConsoleTitle("Dungeon Crawler");
+	
 
 	MainOutBuffer.resize(dwSize, ' ');
 }
@@ -48,63 +46,45 @@ void ConsoleHandling::AddWindow(GraphicWindow* window)
 	pGraphicWindows.push_back(window);
 }
 
+void ConsoleHandling::AddMatrixStrings(unsigned int amount)
+{
+	for (size_t i = 0; i < amount; i++)
+	{
+		unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
+
+		std::default_random_engine gen(seed);
+		std::uniform_int_distribution<SHORT> xdes(0, MAX_X),
+										     ydes(0, 12),
+										     lendes(34, 37);
+
+		SHORT x(xdes(gen)),
+			  y(ydes(gen));
+
+		MatrixString* ms = new MatrixString({ x,y , x + 1,y + lendes(gen) });
+
+		pMatrixStrings.push_back(ms);
+	}
+}
+
 void ConsoleHandling::Update()
 {
-	GetConsoleInput();
-	EvaluateInput();
+	//Get user input.
+	PeekInput(hConsoleIn);
 
+	//Update the information.
 	UpdateGraphicWindows();
 	UpdateTextWindows();
 	UpdateMenuWindows();
-	
+	UpdateMatrixStrings();
+
+	//Draw everything that is in MainOutBuffer to the console.
 	ToConsoleOut();
 
 	//Cleanup
+	ClearInputBuffer(hConsoleIn);
+	Attributes.clear();
 	MainOutBuffer = ' ';
 	MainOutBuffer.resize(dwSize, ' ');
-	std::fill_n(PressedKeys, 26, 0);
-}
-
-void ConsoleHandling::GetConsoleInput()
-{
-		INPUT_RECORD ir[MAX_INPUTS_READ];
-		if (!ReadConsoleInput(hConsoleIn,        // input buffer handle 
-							  ir,				 // buffer to read into
-							  MAX_INPUTS_READ,	 // size of read buffer
-							  &RecordsRead))	 // number of records read
-		{
-			printf("ReadConsoleInput error (%d)", GetLastError());
-			return;
-		}
-		std::copy(ir, ir + MAX_INPUTS_READ, IR);
-}
-
-void ConsoleHandling::EvaluateInput()
-{
-	for (size_t i = 0; i < RecordsRead; i++)
-	{
-		switch (IR[i].EventType)
-		{
-		default:
-			break;
-		case KEY_EVENT:
-			ProccesKeyInput(IR[i].Event.KeyEvent, PressedKeys);
-			break;
-		case MOUSE_EVENT:
-			break;
-		}
-	}
-}
-
-void ConsoleHandling::ProccesKeyInput(KEY_EVENT_RECORD ker,bool* pressedkeys)
-{
-	for (size_t i = 0; i < 26; i++)
-	{
-		if (ker.uChar.AsciiChar == ALPHABET[i])
-		{
-			pressedkeys[i] = true;
-		}
-	}
 }
 
 void ConsoleHandling::UpdateTextWindows()
@@ -132,11 +112,10 @@ void ConsoleHandling::UpdateTextWindows()
 	}
 }
 
+//EDIT: The ProccesInput func should not be called after the buffer has ben set
+//		because now the changes of the current input will be made in the next frame what I think is not optimal.
 void ConsoleHandling::UpdateMenuWindows()
 {
-	bool pressedkeys[26];
-
-	std::copy(PressedKeys, PressedKeys + 26, pressedkeys);
 
 	for (auto i = pMenuWindows.begin(); i != pMenuWindows.end(); i++)
 	{
@@ -156,10 +135,10 @@ void ConsoleHandling::UpdateMenuWindows()
 						 wi->InnerLength,
 						 wi->InnerHeigth,
 						 0);
-
-			DoMenuWindowInput(mw,pressedkeys);
 		}
 		
+		if (!KeyEvents.empty())
+			mw->ProccesInput();
 	}
 
 	
@@ -167,9 +146,6 @@ void ConsoleHandling::UpdateMenuWindows()
 
 void ConsoleHandling::UpdateGraphicWindows()
 {
-	bool pressedkeys[26];
-
-	std::copy(PressedKeys, PressedKeys + 26, pressedkeys);
 
 	for (auto i = pGraphicWindows.begin(); i != pGraphicWindows.end(); i++)
 	{
@@ -179,18 +155,20 @@ void ConsoleHandling::UpdateGraphicWindows()
 
 		if (wi->Active)
 		{
-			DoGraphicWindowInput(gw,pressedkeys);
+			gw->Update();
+
+			Attributes.push_back(gw->GetPlayer()->GetColorInfo());
 
 			SetMainBuffer(wi->MainOutBuffer,
-						 wi->OuterDimensions,
-						 wi->OuterLength,
-						 wi->OuterHeigth);
+						  wi->OuterDimensions,
+						  wi->OuterLength,
+						  wi->OuterHeigth);
 
 			SetMainBuffer(wi->SecondOutBuffer,
-						 wi->InnerDimensions,
-						 wi->InnerLength,
-						 wi->InnerHeigth,
-						 0);
+						  wi->InnerDimensions,
+						  wi->InnerLength,
+						  wi->InnerHeigth,
+						  0);
 
 			wi->SecondOutBuffer = "";
 			wi->SecondOutBuffer.resize(wi->InnerHeigth * wi->InnerLength,' ');
@@ -200,76 +178,30 @@ void ConsoleHandling::UpdateGraphicWindows()
 	}
 }
 
-//FIX: Somthing is still wrong with the way this gets input maybe.
-//FIX: Using the same Identifier on differnt menuwindows (as long the same Identifier isn't schown on screen Identifier can be used more then once)
-//     doesn't quite work. 
-void ConsoleHandling::DoMenuWindowInput(MenuWindow* thismw, bool* pressedkeys) 
+void ConsoleHandling::UpdateMatrixStrings()
 {
-	std::vector<MenuElement*> thismes(thismw->GetMenuElements());
-
-	WINDOW_INFORMATION* thiswi(thismw->GetWinInfo());
-
-	for (auto i = thismes.begin(); i != thismes.end(); i++)
+	for (auto ms : pMatrixStrings)
 	{
-		MenuElement* thisme(*i);
 
-		MenuWindow* nextmw(static_cast<MenuWindow*>(thisme->_GetNextWindow()));
+		ms->Update();
 
-		WINDOW_INFORMATION* nextwi(nextmw->GetWinInfo());
-
-		if (Utility::IsKeyPressed(*(thisme->GetIdentifier().c_str()), pressedkeys))
+		if (ms->GetActive())
 		{
-			thiswi->Active = false;
-			nextwi->Active = true;
+
+			SetMainBuffer(ms->GetMainOutBuffer(),
+						  ms->GetDimensions(),
+						  ms->GetLength(),
+						  ms->GetHeigth(),
+						  0);
+		}
+		else
+		{
+
+			ms->RePopulateMatrixString();
+
 		}
 
-		if (nextwi->Active)
-		{
-			SetMainBuffer(nextwi->MainOutBuffer,
-						 nextwi->OuterDimensions,
-						 nextwi->OuterLength,
-						 nextwi->OuterHeigth);
-
-			SetMainBuffer(nextwi->SecondOutBuffer,
-						 nextwi->InnerDimensions,
-						 nextwi->InnerLength,
-						 nextwi->InnerHeigth,
-						 0);
-		}
 	}
-}
-
-void ConsoleHandling::DoGraphicWindowInput(GraphicWindow* gw, bool* pressedkeys)
-{
-	Player* player(gw->GetPlayer());
-
-	SMALL_RECT* sm(player->GetPToDimensions());
-
-	WINDOW_INFORMATION* wi(gw->GetWinInfo());
-
-	if (Utility::IsKeyPressed('w',pressedkeys))
-	{
-		sm->Top--;
-	}
-	else if (Utility::IsKeyPressed('a',pressedkeys))
-	{
-		sm->Left--;
-	}
-	else if (Utility::IsKeyPressed('s', pressedkeys))
-	{
-		sm->Top++;
-	}
-	else if (Utility::IsKeyPressed('d', pressedkeys))
-	{
-		sm->Left++;
-	}
-
-	Utility::SetOutBuffer(wi->SecondOutBuffer,
-						  wi->InnerLength,
-					 	  player->GetMainOutBuffer(),
-						  player->GetDimensions(),
-						  player->GetLength(),
-						  player->GetHeigth());
 }
 
 void ConsoleHandling::SetMainBuffer(OutBuffer outbuffer, SMALL_RECT destination, unsigned length, unsigned height, bool ismain)
@@ -304,6 +236,19 @@ void ConsoleHandling::ToConsoleOut()
 			return;
 		}
 
+		for (COLOR_INFO ci : Attributes)
+		{
+			if (!WriteConsoleOutputAttribute(_hConsoleOut,
+				ci.Attribute,
+				ci.Length,
+				ci.Coord,
+				&WrittenAttributes))
+			{
+				printf("WriteConsoleOutputAttribute error (%d)", GetLastError());
+				return;
+			}
+		}
+
 		SetConsoleActiveScreenBuffer(_hConsoleOut);
 
 		bState = 0;
@@ -319,6 +264,19 @@ void ConsoleHandling::ToConsoleOut()
 		{
 			printf("WriteConsoleOutputCharacter error (%d)", GetLastError());
 			return;
+		}
+
+		for (COLOR_INFO ci : Attributes)
+		{
+			if (!WriteConsoleOutputAttribute(hConsoleOut,
+				ci.Attribute,
+				ci.Length,
+				ci.Coord,
+				&WrittenAttributes))
+			{
+				printf("WriteConsoleOutputAttribute error (%d)", GetLastError());
+				return;
+			}
 		}
 
 		SetConsoleActiveScreenBuffer(hConsoleOut);

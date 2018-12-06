@@ -1,7 +1,8 @@
 #pragma once
 #include "Entity.h"
 
-class MenuElement : public Entity
+class MenuElement :
+	public Entity
 {
 private:
 

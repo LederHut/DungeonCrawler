@@ -25,6 +25,32 @@ void MenuWindow::AddMenuElement(MenuElement* me)
 
 }
 
+void MenuWindow::ProccesInput()
+{
+
+	for (MenuElement* me : MenuElements)
+	{
+		if (me->_GetNextWindow() != nullptr)
+		{
+			for (auto itr = KeyEvents.begin(); itr != KeyEvents.end(); itr++)
+			{
+				if (*me->GetIdentifier().c_str() == itr->uChar.AsciiChar)
+				{
+					WinInfo.Active = false;
+					MenuWindow* nextmw(static_cast<MenuWindow*>(me->_GetNextWindow()));
+					WINDOW_INFORMATION* nextwi(nextmw->GetWinInfo());
+					nextwi->Active = true;
+					KeyEvents.erase(itr);
+					break;
+				}
+			}
+		}
+	}
+
+}
+
+
+
 //TODO: Refacture the DoText func in the TextWindow.cpp for this purpose.
 void MenuWindow::AddText()
 {

@@ -3,11 +3,14 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <chrono>
+#include <random>
+#include <map>
 #include <Windows.h>
 
 #define MAX_X 200
 #define MAX_Y 50
-#define MAX_INPUTS_READ 128
+#define MAX_INPUT_READS 64
 
 #define iswhole(a) ((int)a == (float)a ? true : false)
 
@@ -28,7 +31,7 @@ struct WINDOW_INFORMATION
 {
 
 	OutBuffer MainOutBuffer,
-		      SecondOutBuffer; //TODO: wirte a overide for the -> operator to sync the second and main buffer on use.
+		      SecondOutBuffer;
 
 	SMALL_RECT OuterDimensions,
 			   InnerDimensions;
@@ -68,6 +71,13 @@ struct STATIC_TEXT
 
 	unsigned LineLength{ 0 },
 		     TextHeigth{ 0 };
+};
+
+struct COLOR_INFO
+{
+	DWORD Length;
+	WORD Attribute[1];
+	COORD Coord;
 };
 
 struct ENTITY_INFORMATION
@@ -163,7 +173,7 @@ namespace Utility
 		outbuffer = temp;
 	}
 
-	// # Set an OutBuffer in the scope of the new OutBuffer.
+	// # Set an OutBuffer in the scope of the DesOutBuffer.
 	// # Thus the dimensions must be in trems of the new scope.
 	static void SetOutBuffer(OutBuffer &outbufferdes,
 							 unsigned bufferdeslength,
@@ -180,198 +190,6 @@ namespace Utility
 			}
 		}
 
-	}
-
-	static bool IsKeyPressed(char character, bool* pressedkeys) 
-	{
-		switch (character)
-		{
-		default:
-			return false;
-		case 'a':
-			if (pressedkeys[0] == true)
-			{
-				pressedkeys[0] = false;
-				return true;
-			}
-			else { return false; }
-		case 'b':
-			if (pressedkeys[1] == true)
-			{
-				pressedkeys[1] = false;
-				return true;
-			}
-			else { return false; }
-		case 'c':
-			if (pressedkeys[2] == true)
-			{
-				pressedkeys[2] = false;
-				return true;
-			}
-			else { return false; }
-		case 'd':
-			if (pressedkeys[3] == true)
-			{
-				pressedkeys[3] = false;
-				return true;
-			}
-			else { return false; }
-		case 'e':
-			if (pressedkeys[4] == true)
-			{
-				pressedkeys[4] = false;
-				return true;
-			}
-			else { return false; }
-		case 'f':
-			if (pressedkeys[5] == true)
-			{
-				pressedkeys[5] = false;
-				return true;
-			}
-			else { return false; }
-		case 'g':
-			if (pressedkeys[6] == true)
-			{
-				pressedkeys[6] = false;
-				return true;
-			}
-			else { return false; }
-		case 'h':
-			if (pressedkeys[7] == true)
-			{
-				pressedkeys[7] = false;
-				return true;
-			}
-			else { return false; }
-		case 'i':
-			if (pressedkeys[8] == true)
-			{
-				pressedkeys[8] = false;
-				return true;
-			}
-			else { return false; }
-		case 'j':
-			if (pressedkeys[9] == true)
-			{
-				pressedkeys[9] = false;
-				return true;
-			}
-			else { return false; }
-		case 'k':
-			if (pressedkeys[10] == true)
-			{
-				pressedkeys[10] = false;
-				return true;
-			}
-			else { return false; }
-		case 'l':
-			if (pressedkeys[11] == true)
-			{
-				pressedkeys[11] = false;
-				return true;
-			}
-			else { return false; }
-		case 'm':
-			if (pressedkeys[12] == true)
-			{
-				pressedkeys[12] = false;
-				return true;
-			}
-			else { return false; }
-		case 'n':
-			if (pressedkeys[13] == true)
-			{
-				pressedkeys[13] = false;
-				return true;
-			}
-			else { return false; }
-		case 'o':
-			if (pressedkeys[14] == true)
-			{
-				pressedkeys[14] = false;
-				return true;
-			}
-			else { return false; }
-		case 'p':
-			if (pressedkeys[15] == true)
-			{
-				pressedkeys[15] = false;
-				return true;
-			}
-			else { return false; }
-		case 'q':
-			if (pressedkeys[16] == true)
-			{
-				pressedkeys[16] = false;
-				return true;
-			}
-			else { return false; }
-		case 'r':
-			if (pressedkeys[17] == true)
-			{
-				pressedkeys[17] = false;
-				return true;
-			}
-			else { return false; }
-		case 's':
-			if (pressedkeys[18] == true)
-			{
-				pressedkeys[18] = false;
-				return true;
-			}
-			else { return false; }
-		case 't':
-			if (pressedkeys[19] == true)
-			{
-				pressedkeys[19] = false;
-				return true;
-			}
-			else { return false; }
-		case 'u':
-			if (pressedkeys[20] == true)
-			{
-				pressedkeys[20] = false;
-				return true;
-			}
-			else { return false; }
-		case 'v':
-			if (pressedkeys[21] == true)
-			{
-				pressedkeys[21] = false;
-				return true;
-			}
-			else { return false; }
-		case 'w':
-			if (pressedkeys[22] == true)
-			{
-				pressedkeys[22] = false;
-				return true;
-			}
-			else { return false; }
-		case 'x':
-			if (pressedkeys[23] == true)
-			{
-				pressedkeys[23] = false;
-				return true;
-			}
-			else { return false; }
-		case 'y':
-			if (pressedkeys[24] == true)
-			{
-				pressedkeys[24] = false;
-				return true;
-			}
-			else { return false; }
-		case 'z':
-			if (pressedkeys[25] == true)
-			{
-				pressedkeys[25] = false;
-				return true;
-			}
-			else { return false; }
-
-		}
 	}
 
 	static STATIC_TEXT ToStaticText(std::vector<bool> data)
@@ -401,4 +219,5 @@ namespace Utility
 
 		return st;
 	}
+
 }

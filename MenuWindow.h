@@ -1,12 +1,14 @@
 #pragma once
 
 #include "Utility.h"
+#include "Input.h"
 #include "TextWindow.h"
 #include "MenuElement.h"
 
 
 
-class MenuWindow 
+class MenuWindow : 
+	public Input
 {
 private:
 
@@ -25,6 +27,8 @@ public:
 	~MenuWindow();
 
 	void AddMenuElement(MenuElement*);
+
+	void ProccesInput();
 
 	inline void WriteToTextfield(std::string text)				{ AddText(); }
 

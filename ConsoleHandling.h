@@ -8,9 +8,12 @@
 #include "TextWindow.h"
 #include "MenuWindow.h"
 #include "GraphicWindow.h"
+#include "MatrixString.h"
+#include "Input.h"
 
 
-class ConsoleHandling
+class ConsoleHandling : 
+	public Input
 {
 private:
 
@@ -18,13 +21,14 @@ private:
 	std::vector<TextWindow*>		pTextWindows;
 	std::vector<MenuWindow*>		pMenuWindows;
 	std::vector<GraphicWindow*>		pGraphicWindows;
+	std::vector<MatrixString*>		pMatrixStrings;
 
 	COORD							ConsoleDimension;
 
 	CONSOLE_SCREEN_BUFFER_INFO		csbi;
 	CONSOLE_CURSOR_INFO				cci;
 
-	INPUT_RECORD					IR[MAX_INPUTS_READ];
+	INPUT_RECORD					IR[MAX_INPUT_READS];
 
 	HANDLE							hConsoleOut,
 									_hConsoleOut,
@@ -36,15 +40,13 @@ private:
 
 	std::vector<bool> ActiveEntitys;
 
+	std::vector<COLOR_INFO> Attributes;
+
 	DWORD dwSize,
 		  RecordsRead,
-		  NextMenuWindow;
+		  WrittenAttributes;
 
-	bool bPlaceHolder { 0 },
-		 bState,
-		 *LastMenuWindow,
-	 	 *LastMenuElement,
-		 PressedKeys[26];
+	bool bState;
 	
 public:
 
@@ -55,32 +57,27 @@ public:
 	void AddWindow(TextWindow*);
 	void AddWindow(MenuWindow*);
 	void AddWindow(GraphicWindow*);
+	void AddMatrixStrings(unsigned int);
 	
 
 	void Update();
 
 	inline DWORD GetRecordsRead() { return RecordsRead; }
-	inline bool* GetPressedKeys() { return PressedKeys; }
 	inline std::vector<bool> GetActiveEntitys() { return ActiveEntitys; }
 
-	private:
+private:
 
-	
+
 	void UpdateTextWindows();
 	void UpdateMenuWindows();
 	void UpdateGraphicWindows();
-
-	void DoMenuWindowInput(MenuWindow*, bool*);
-	void DoGraphicWindowInput(GraphicWindow*, bool*);
+	void UpdateMatrixStrings();
 
 	void SetMainBuffer(OutBuffer, SMALL_RECT, const unsigned, const unsigned, bool ismain = 1);
-	void ProccesKeyInput(KEY_EVENT_RECORD, bool*);
 	void SetWindow(_COORD);
 	void ConsoleSetup(HANDLE&);
 	void ClearConsole(HANDLE&);
 
 	void ToConsoleOut();
-	void GetConsoleInput();
-	void EvaluateInput();
 	
 };

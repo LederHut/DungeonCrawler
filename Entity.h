@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Utility.h"
+#include "Input.h"
 
-class Entity
+class Entity:
+	public Input
 {
-	int test;
 protected:
 	
 	OutBuffer MainOutBuffer;
@@ -23,11 +24,14 @@ public:
 
 	inline void SetActive(bool b) { Active = b; }
 
+ 	virtual void Update(){}
+
 	inline OutBuffer GetMainOutBuffer() { return MainOutBuffer; }
 	inline SMALL_RECT GetDimensions() { return Dimensions; }
 	inline unsigned GetHeigth() { return Heigth; }
 	inline unsigned GetLength() { return Length; }
 	inline bool* GetPToActive() { return &Active; }
+	inline bool GetActive() { return Active; }
 
 private:
 

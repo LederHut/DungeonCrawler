@@ -6,6 +6,7 @@ ConsoleHandling::ConsoleHandling()
 	:ConsoleDimension	({ MAX_X , MAX_Y }),
 	 dwSize				(MAX_X * MAX_Y),
 	 bState				(1),
+	 bClear				(1),
 	 RecordsRead		(0),
 	
 	 hConsoleOut		(GetStdHandle(STD_OUTPUT_HANDLE)),
@@ -23,7 +24,8 @@ ConsoleHandling::ConsoleHandling()
 	ConsoleSetup(hConsoleOut);
 	SetWindow(ConsoleDimension);
 	SetConsoleTitle("Dungeon Crawler");
-	
+
+	InputThread.push_back(std::thread(&Input::PeekInput, &Input(), std::ref(hConsoleIn)));
 
 	MainOutBuffer.resize(dwSize, ' ');
 }
@@ -68,9 +70,9 @@ void ConsoleHandling::AddMatrixStrings(unsigned int amount)
 
 void ConsoleHandling::Update()
 {
-	//Get user input.
-	PeekInput(hConsoleIn);
-
+	//Detach input thread.
+	DetachThread();
+	
 	//Update the information.
 	UpdateGraphicWindows();
 	UpdateTextWindows();
@@ -81,7 +83,7 @@ void ConsoleHandling::Update()
 	ToConsoleOut();
 
 	//Cleanup
-	ClearInputBuffer(hConsoleIn);
+	ClearInputBufferThread();
 	Attributes.clear();
 	MainOutBuffer = ' ';
 	MainOutBuffer.resize(dwSize, ' ');
@@ -222,19 +224,9 @@ void ConsoleHandling::SetMainBuffer(OutBuffer outbuffer, SMALL_RECT destination,
 
 void ConsoleHandling::ToConsoleOut()
 {
-
 	if (bState)
 	{
 		ClearConsole(_hConsoleOut);
-		if (!WriteConsoleOutputCharacter(_hConsoleOut,
-			MainOutBuffer.c_str(),
-			MainOutBuffer.length(),
-			{ 0, 0 },
-			&dwSize))
-		{
-			printf("WriteConsoleOutputCharacter error (%d)", GetLastError());
-			return;
-		}
 
 		for (COLOR_INFO ci : Attributes)
 		{
@@ -249,14 +241,7 @@ void ConsoleHandling::ToConsoleOut()
 			}
 		}
 
-		SetConsoleActiveScreenBuffer(_hConsoleOut);
-
-		bState = 0;
-	}
-	else if (!bState)
-	{
-		ClearConsole(hConsoleOut);
-		if (!WriteConsoleOutputCharacter(hConsoleOut,
+		if (!WriteConsoleOutputCharacter(_hConsoleOut,
 			MainOutBuffer.c_str(),
 			MainOutBuffer.length(),
 			{ 0, 0 },
@@ -265,6 +250,14 @@ void ConsoleHandling::ToConsoleOut()
 			printf("WriteConsoleOutputCharacter error (%d)", GetLastError());
 			return;
 		}
+
+		SetConsoleActiveScreenBuffer(_hConsoleOut);
+
+		bState = 0;
+	}
+	else if (!bState)
+	{
+		ClearConsole(hConsoleOut);
 
 		for (COLOR_INFO ci : Attributes)
 		{
@@ -278,6 +271,18 @@ void ConsoleHandling::ToConsoleOut()
 				return;
 			}
 		}
+
+		if (!WriteConsoleOutputCharacter(hConsoleOut,
+			MainOutBuffer.c_str(),
+			MainOutBuffer.length(),
+			{ 0, 0 },
+			&dwSize))
+		{
+			printf("WriteConsoleOutputCharacter error (%d)", GetLastError());
+			return;
+		}
+
+		
 
 		SetConsoleActiveScreenBuffer(hConsoleOut);
 
@@ -334,5 +339,37 @@ void ConsoleHandling::ClearConsole(HANDLE &handle)
 	{
 		printf("FillConsoleOutputCharacter error (%d)", GetLastError());
 		return;
+	}
+
+	/*if (!FillConsoleOutputAttribute(handle,
+		FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
+		dwSize,
+		{ 0, 0 },
+		&WrittenAttributes))
+	{
+		printf("FillConsoleOutputCharacter error (%d)", GetLastError());
+		return;
+	}*/
+}
+
+void ConsoleHandling::ClearInputBufferThread()
+{
+	if (bClear)
+	{
+		bClear = false;
+		ClearInputBuffer(hConsoleIn);
+	}
+		
+}
+
+void ConsoleHandling::DetachThread()
+{
+	if (InputThread.front().joinable() && bFree)
+	{
+		bClear = true;
+		bFree = false;
+		InputThread.front().detach();
+		InputThread.pop_back();
+		InputThread.push_back(std::thread(&Input::PeekInput, &Input(), std::ref(hConsoleIn)));
 	}
 }

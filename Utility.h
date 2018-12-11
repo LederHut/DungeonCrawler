@@ -1,12 +1,6 @@
 #pragma once
 
-#include <iostream>
-#include <vector>
-#include <string>
-#include <chrono>
-#include <random>
-#include <map>
-#include <Windows.h>
+#include "pch.h"
 
 #define MAX_X 200
 #define MAX_Y 50

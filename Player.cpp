@@ -37,7 +37,7 @@ void Player::Movement()
 	{
 		if ('w' == itr->uChar.AsciiChar)
 		{
-			if (Dimensions.Top == Boundaries.Top)
+			if (Dimensions.Top == 0)
 			{
 				KeyEvents.erase(itr);
 				break;
@@ -53,7 +53,7 @@ void Player::Movement()
 		}
 		else if ('a' == itr->uChar.AsciiChar)
 		{
-			if (Dimensions.Top == Boundaries.Top)
+			if (Dimensions.Left == 0)
 			{
 				KeyEvents.erase(itr);
 				break;
@@ -69,7 +69,7 @@ void Player::Movement()
 		}
 		else if ('s' == itr->uChar.AsciiChar)
 		{
-			if (Dimensions.Top == Boundaries.Top)
+			if (Dimensions.Bottom == Boundaries.Bottom - Boundaries.Top -1)
 			{
 				KeyEvents.erase(itr);
 				break;
@@ -85,7 +85,7 @@ void Player::Movement()
 		}
 		else if ('d' == itr->uChar.AsciiChar)
 		{
-			if (Dimensions.Top == Boundaries.Top)
+			if (Dimensions.Right == Boundaries.Right - Boundaries.Left)
 			{
 				KeyEvents.erase(itr);
 				break;

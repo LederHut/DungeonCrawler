@@ -2,6 +2,7 @@
 
 INPUT_RECORD Input::_ir[MAX_INPUT_READS];
 DWORD Input::InputsRead;
+bool Input::bFree = false;
 
 std::vector<KEY_EVENT_RECORD> Input::KeyEvents;
 std::vector<MOUSE_EVENT_RECORD> Input::MouseEvents;
@@ -16,6 +17,8 @@ Input::~Input()
 
 void Input::PeekInput(HANDLE& inhandle)
 {
+	std::this_thread::sleep_for(std::chrono::milliseconds(35));
+
 	if (!PeekConsoleInput(inhandle,
 						  _ir,
 						  MAX_INPUT_READS,
@@ -26,6 +29,8 @@ void Input::PeekInput(HANDLE& inhandle)
 	}
 
 	EvaluateInput();
+
+	bFree = true;
 }
 
 void Input::ClearInputBuffer(HANDLE& inhandle)

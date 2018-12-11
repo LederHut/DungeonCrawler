@@ -11,6 +11,8 @@ private:
 
 public:
 
+	static bool bFree;
+
 	static std::vector<KEY_EVENT_RECORD> KeyEvents;
 	static std::vector<MOUSE_EVENT_RECORD> MouseEvents;
 

@@ -22,6 +22,8 @@ private:
 	std::vector<MenuWindow*>		pMenuWindows;
 	std::vector<GraphicWindow*>		pGraphicWindows;
 	std::vector<MatrixString*>		pMatrixStrings;
+	
+	std::vector<std::thread>		InputThread;
 
 	COORD							ConsoleDimension;
 
@@ -33,7 +35,7 @@ private:
 	HANDLE							hConsoleOut,
 									_hConsoleOut,
 									hConsoleIn;
-
+	
 	OutBuffer MainOutBuffer;
 
 	std::vector<ON_KEY_PRESS_CALLBACK_FUNC> EntityCallbacks;
@@ -46,7 +48,8 @@ private:
 		  RecordsRead,
 		  WrittenAttributes;
 
-	bool bState;
+	bool bState,
+		 bClear;
 	
 public:
 
@@ -77,6 +80,8 @@ private:
 	void SetWindow(_COORD);
 	void ConsoleSetup(HANDLE&);
 	void ClearConsole(HANDLE&);
+	void ClearInputBufferThread();
+	void DetachThread();
 
 	void ToConsoleOut();
 	

@@ -1,24 +1,39 @@
 #pragma once
 #include "Entity.h"
+#include "Terrain.h"
 
 class MenuElement :
 	public Entity
 {
 private:
 
-	const std::string Identifier;
+	COLOR_INFO ColorInfo;
+
+	std::string Identifier;
+
+	SHORT IdPos,
+		  CrossPos;
 
 	void* NextWindow;
 
 public:
 
-	void SetNextWindow(void*);
+	bool isSelected;
 
-	MenuElement(OutBuffer titel, const std::string indentifier, SMALL_RECT dimensoins);
+	void SetTerrain(Terrain* t);
+	void SetNextWindow(void*);
+	void Select();
+	void UnSelect();
+
+	MenuElement(OutBuffer titel, std::string indentifier, SMALL_RECT dimensoins);
 	~MenuElement();
 
+	inline void SetColorPos(SMALL_RECT dimensions) { ColorInfo.Coord = {dimensions.Left + ColorInfo.Coord.X, dimensions.Top + Dimensions.Top}; }
+
+	inline bool GetisSelected() { return isSelected; }
+	inline COLOR_INFO GetColorInfo() { return ColorInfo; }
 	inline std::string GetIdentifier() { return Identifier; }
-	inline void* _GetNextWindow() {return NextWindow; }
+	inline void* _GetNextWindow() { return NextWindow; }
 
 private:
 

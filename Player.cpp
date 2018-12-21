@@ -1,5 +1,5 @@
+#include "pch.h"
 #include "Player.h"
-
 
 
 Player::Player(SMALL_RECT pos, std::string indentifier, WORD attribute, bool b)
@@ -15,7 +15,7 @@ Player::Player(SMALL_RECT pos, std::string indentifier, WORD attribute, bool b)
 	Dimensions.Bottom = Dimensions.Top;
 
 	ColorInfo.Length = Length;
-	ColorInfo.Coord = {Dimensions.Left,Dimensions.Top};
+	ColorInfo.Coord = {Dimensions.Left, Dimensions.Top};
 	ColorInfo.Attribute[0] = attribute;
 }
 

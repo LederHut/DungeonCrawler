@@ -1,15 +1,18 @@
 #pragma once
 
 #include "Entity.h"
-#include "Utility.h"
 
 class MatrixString :
 	public Entity
 {
 private:
 
+	unsigned int UpdateCounter,
+				 MaxUpdates;
+
 	bool Growth,
 		 Shift{ 0 };
+
 	SHORT InitialLeft;
 
 public:

@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Input.h"
 
 INPUT_RECORD Input::_ir[MAX_INPUT_READS];
@@ -17,12 +18,13 @@ Input::~Input()
 
 void Input::PeekInput(HANDLE& inhandle)
 {
+
 	std::this_thread::sleep_for(std::chrono::milliseconds(35));
 
 	if (!PeekConsoleInput(inhandle,
-						  _ir,
-						  MAX_INPUT_READS,
-						  &InputsRead))
+		_ir,
+		MAX_INPUT_READS,
+		&InputsRead))
 	{
 		printf("ReadConsoleInput error (%d)", GetLastError());
 		return;

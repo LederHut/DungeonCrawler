@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Utility.h"
-#include "Player.h"
 #include "Input.h"
+#include "Player.h"
+#include "Terrain.h"
 
-class GraphicWindow :
+class GraphicWindow:
 	public Input
 {
 private:
@@ -12,6 +12,8 @@ private:
 	WINDOW_INFORMATION WinInfo;
 
 	Player* _Player;
+
+	std::vector<Terrain> TerVec;
 
 public:
 
@@ -30,4 +32,3 @@ private:
 	void UpdatePlayer();
 
 };
-

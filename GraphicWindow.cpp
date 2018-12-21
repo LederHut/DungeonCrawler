@@ -1,5 +1,5 @@
+#include "pch.h"
 #include "GraphicWindow.h"
-
 
 
 GraphicWindow::GraphicWindow(std::string title, SMALL_RECT dimensions)

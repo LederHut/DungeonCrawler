@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Utility.h"
 #include "Input.h"
 
 class Entity:
@@ -12,8 +11,8 @@ protected:
 
 	SMALL_RECT Dimensions;
 
-	unsigned int Length,
-				 Heigth;
+	SHORT Length,
+		  Heigth;
 
 	bool Active{ 0 };
 

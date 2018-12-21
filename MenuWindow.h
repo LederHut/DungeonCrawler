@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Utility.h"
+//#include "Utility.h"
 #include "Input.h"
 #include "TextWindow.h"
 #include "MenuElement.h"
 
 
 
-class MenuWindow : 
+class MenuWindow :
 	public Input
 {
 private:
@@ -18,23 +18,28 @@ private:
 
 	std::vector<MenuElement*>	MenuElements;
 
-	bool* PressedKeys;
+	std::vector<COLOR_INFO>		ColorInfos;
 
+	MenuElement*				CurrSelect;
 
 public:
 
 	MenuWindow(std::string, SMALL_RECT,bool active = 1);
 	~MenuWindow();
 
-	void AddMenuElement(MenuElement*);
+	void AddMenuElement(MenuElement* me);
 
 	void ProccesInput();
+	void HandleMenuKeyInput(MenuElement* me);
+	void HandleMenuMouseInput(MenuElement* me);
 
 	inline void WriteToTextfield(std::string text)				{ AddText(); }
 
 	inline void SetActive(bool b)								{ WinInfo.Active = b; }
 	inline void SetTextfield(SMALL_RECT dimensions)				{ TextfieldInfo.SetTextfield(dimensions); }
 
+	inline auto GetColorInfoEnd()								{ return ColorInfos.end(); }
+	inline auto GetColorInfosBegin()							{ return ColorInfos.begin(); }
 	inline WINDOW_INFORMATION* GetWinInfo()						{ return &WinInfo; }
 	inline std::vector<MenuElement*> GetMenuElements()			{ return MenuElements; }
 

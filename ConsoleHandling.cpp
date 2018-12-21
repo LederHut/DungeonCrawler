@@ -1,18 +1,18 @@
-
+#include "pch.h"
 #include "ConsoleHandling.h"
 
 
-ConsoleHandling::ConsoleHandling()
-	:ConsoleDimension	({ MAX_X , MAX_Y }),
-	 dwSize				(MAX_X * MAX_Y),
-	 bState				(1),
-	 bClear				(1),
-	 RecordsRead		(0),
+ConsoleHandling::ConsoleHandling():
+	ConsoleDimension	({ MAX_X , MAX_Y }),
+	dwSize				(MAX_X * MAX_Y),
+	bState				(1),
+	bClear				(1),
+	RecordsRead			(0),
+
+	hConsoleOut			(GetStdHandle(STD_OUTPUT_HANDLE)),
+	_hConsoleOut		(GetStdHandle(STD_OUTPUT_HANDLE)),
+	hConsoleIn			(GetStdHandle(STD_INPUT_HANDLE))
 	
-	 hConsoleOut		(GetStdHandle(STD_OUTPUT_HANDLE)),
-	 _hConsoleOut		(GetStdHandle(STD_OUTPUT_HANDLE)),
-	 hConsoleIn			(GetStdHandle(STD_INPUT_HANDLE))
-	 
 {
 	if (hConsoleOut == INVALID_HANDLE_VALUE)
 	{
@@ -20,8 +20,10 @@ ConsoleHandling::ConsoleHandling()
 		return;
 	}
 
+	cci.bVisible = false;
+
 	SetConsoleActiveScreenBuffer(hConsoleOut);
-	ConsoleSetup(hConsoleOut);
+	ConsoleSetup(hConsoleIn);
 	SetWindow(ConsoleDimension);
 	SetConsoleTitle("Dungeon Crawler");
 
@@ -41,6 +43,7 @@ void ConsoleHandling::AddWindow(TextWindow* window)
 }
 void ConsoleHandling::AddWindow(MenuWindow* window)
 {
+	Attributes.insert(Attributes.end(), window->GetColorInfosBegin(), window->GetColorInfoEnd());
 	pMenuWindows.push_back(window);
 }
 void ConsoleHandling::AddWindow(GraphicWindow* window)
@@ -48,8 +51,10 @@ void ConsoleHandling::AddWindow(GraphicWindow* window)
 	pGraphicWindows.push_back(window);
 }
 
-void ConsoleHandling::AddMatrixStrings(unsigned int amount)
+void ConsoleHandling::AddMatrixStrings(unsigned int amount, bool growth)
 {
+	amount = amount > MAX_Y ? 200 : amount;
+
 	for (size_t i = 0; i < amount; i++)
 	{
 		unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
@@ -57,14 +62,18 @@ void ConsoleHandling::AddMatrixStrings(unsigned int amount)
 		std::default_random_engine gen(seed);
 		std::uniform_int_distribution<SHORT> xdes(0, MAX_X),
 										     ydes(0, 12),
-										     lendes(34, 37);
+										     lendes(3, 10);
 
 		SHORT x(xdes(gen)),
 			  y(ydes(gen));
 
-		MatrixString* ms = new MatrixString({ x,y , x + 1,y + lendes(gen) });
+		if (std::find(UsedXPos.begin(),UsedXPos.end(),x) != UsedXPos.end())
+			Utility::FindNewValue(UsedXPos, x);
+
+		MatrixString* ms = new MatrixString({ x,growth? 0 : y , x + 1,y + lendes(gen) }, growth);
 
 		pMatrixStrings.push_back(ms);
+		UsedXPos.push_back(x);
 	}
 }
 
@@ -128,18 +137,18 @@ void ConsoleHandling::UpdateMenuWindows()
 		if (wi->Active)
 		{
 			SetMainBuffer(wi->MainOutBuffer,
-						 wi->OuterDimensions,
-						 wi->OuterLength,
-						 wi->OuterHeigth);
+						  wi->OuterDimensions,
+						  wi->OuterLength,
+						  wi->OuterHeigth);
 
 			SetMainBuffer(wi->SecondOutBuffer,
-						 wi->InnerDimensions,
-						 wi->InnerLength,
-						 wi->InnerHeigth,
-						 0);
+						  wi->InnerDimensions,
+						  wi->InnerLength,
+						  wi->InnerHeigth,
+						  0);
 		}
 		
-		if (!KeyEvents.empty())
+		if (!KeyEvents.empty() && MouseEvents.empty())
 			mw->ProccesInput();
 	}
 
@@ -303,7 +312,7 @@ void ConsoleHandling::SetWindow(_COORD cSize)
 	SetConsoleWindowInfo(hConsoleOut, TRUE, &Rect);
 }
 
-void ConsoleHandling::ConsoleSetup(HANDLE &hStdOutput)
+void ConsoleHandling::ConsoleSetup(HANDLE &hstdin)
 {
 	
 
@@ -312,7 +321,7 @@ void ConsoleHandling::ConsoleSetup(HANDLE &hStdOutput)
 		printf("SetConsoleDisplayMode error (%d)",GetLastError());
 		return;
 	}*/
-	if (!SetConsoleMode(hStdOutput, ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT))
+	if (!SetConsoleMode(hstdin, ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT))
 	{
 		printf("SetConsoleMode error (%d)",GetLastError());
 		return;
@@ -323,7 +332,7 @@ void ConsoleHandling::ConsoleSetup(HANDLE &hStdOutput)
 		return;
 	}*/
 
-	SetConsoleCursorInfo(hStdOutput, &cci);
+	SetConsoleCursorInfo(hstdin, &cci);
 
 }
 

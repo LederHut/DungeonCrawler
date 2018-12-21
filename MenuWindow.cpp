@@ -1,9 +1,10 @@
-
+#include "pch.h"
 #include "MenuWindow.h"
 
 
-MenuWindow::MenuWindow(std::string title, SMALL_RECT dimensions,bool active)
-	:WinInfo(title,dimensions,active)
+MenuWindow::MenuWindow(std::string title, SMALL_RECT dimensions,bool active):
+	WinInfo(title,dimensions,active),
+	CurrSelect(nullptr)
 {
 	Utility::DoBorder(WinInfo.Title, WinInfo.MainOutBuffer, WinInfo.OuterDimensions);
 }
@@ -14,6 +15,9 @@ MenuWindow::~MenuWindow()
 
 void MenuWindow::AddMenuElement(MenuElement* me)
 {
+
+	me->SetColorPos(WinInfo.InnerDimensions);
+
 	Utility::SetOutBuffer(WinInfo.SecondOutBuffer,
 						  WinInfo.InnerLength,
 						  me->GetMainOutBuffer(),
@@ -21,6 +25,7 @@ void MenuWindow::AddMenuElement(MenuElement* me)
 						  me->GetLength(),
 						  me->GetHeigth());
 
+	ColorInfos.push_back(me->GetColorInfo());
 	MenuElements.push_back(me);
 
 }
@@ -32,20 +37,52 @@ void MenuWindow::ProccesInput()
 	{
 		if (me->_GetNextWindow() != nullptr)
 		{
-			for (auto itr = KeyEvents.begin(); itr != KeyEvents.end(); itr++)
+			HandleMenuKeyInput(me);
+		}
+		if (!me->GetisSelected())
+		{
+			for (auto itr = MouseEvents.begin(); itr != MouseEvents.end(); itr++)
 			{
-				if (*me->GetIdentifier().c_str() == itr->uChar.AsciiChar)
+				if (itr->dwButtonState == FROM_LEFT_2ND_BUTTON_PRESSED)
 				{
-					WinInfo.Active = false;
-					MenuWindow* nextmw(static_cast<MenuWindow*>(me->_GetNextWindow()));
-					WINDOW_INFORMATION* nextwi(nextmw->GetWinInfo());
-					nextwi->Active = true;
-					KeyEvents.erase(itr);
-					break;
+					if (CurrSelect == nullptr)
+					{
+						me->Select();
+						break;
+					}
+					else
+					{
+						me->Select();
+						CurrSelect->UnSelect();
+						break;
+					}
 				}
 			}
 		}
 	}
+
+}
+
+void MenuWindow::HandleMenuKeyInput(MenuElement* me)
+{
+	for (auto itr = KeyEvents.begin(); itr != KeyEvents.end(); itr++)
+	{
+		if (*(me->GetIdentifier().c_str()) == itr->uChar.AsciiChar)
+		{
+			WinInfo.Active = false;
+			MenuWindow* nextmw(static_cast<MenuWindow*>(me->_GetNextWindow()));
+			WINDOW_INFORMATION* nextwi(nextmw->GetWinInfo());
+			nextwi->Active = true;
+			KeyEvents.erase(itr);
+			break;
+		}
+	}
+}
+
+void MenuWindow::HandleMenuMouseInput(MenuElement * me)
+{
+
+
 
 }
 

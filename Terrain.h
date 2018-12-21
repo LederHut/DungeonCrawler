@@ -10,8 +10,10 @@ private:
 
 public:
 
-	Terrain(SMALL_RECT, const std::string indentifier, WORD attribute, bool b = 1);
+	Terrain(SMALL_RECT pos, const std::string indentifier, WORD attribute, bool b = 1);
 	~Terrain();
+
+	inline COLOR_INFO GetColorInfo() { return ColorInfo; }
 
 private:
 

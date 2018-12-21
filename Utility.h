@@ -1,5 +1,13 @@
 #pragma once
 
+#ifdef DC_PLATFORM_WINDOWS
+	#ifdef DC_BUILD_DLL
+		#define DC_API __declspec(dllexport)
+	#else
+		#define DC_API __declspec(dllimport)
+	#endif
+#endif
+
 #include "pch.h"
 
 #define MAX_X 200
@@ -10,7 +18,7 @@
 
 typedef std::string OutBuffer;
 typedef unsigned FLAG;
-typedef void (*ON_KEY_PRESS_CALLBACK_FUNC)();
+typedef void (*PeekInput_CALLBACK)();
 
 
 constexpr char ALPHABET[26] = { 'a','b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
@@ -70,7 +78,7 @@ struct STATIC_TEXT
 struct COLOR_INFO
 {
 	DWORD Length;
-	WORD Attribute[1];
+	WORD Attribute[1]{ 0 };
 	COORD Coord;
 };
 
@@ -186,32 +194,15 @@ namespace Utility
 
 	}
 
-	static STATIC_TEXT ToStaticText(std::vector<bool> data)
+	static void FindNewValue(std::vector<SHORT>& usedxpos, SHORT& x)
 	{
-		STATIC_TEXT st;
-
-		unsigned int n(0);
-
-		for (auto i = data.begin(); i != data.end(); i++)
+		while (std::find(usedxpos.begin(), usedxpos.end(), x) != usedxpos.end())
 		{
-			bool b = *i;
-
-			if (b)
-			{
-				st.Text = "1";
-					 
-			}
-			else
-			{
-				st.Text = "0";
-			}
-			n++;
+			unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
+			std::default_random_engine gen(seed);
+			std::uniform_int_distribution<SHORT> xdes(0, MAX_X);
+			x = xdes(gen);
 		}
-		st.TextHeigth = n;
-		st.LineLength = 0;
-		n = 0;
-
-		return st;
 	}
 
 }

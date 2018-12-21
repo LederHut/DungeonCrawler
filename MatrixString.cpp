@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "MatrixString.h"
 
 //FIX: Something is wrong with the generation of the Strings.
@@ -7,6 +8,7 @@ MatrixString::MatrixString(SMALL_RECT dimensions, bool growth)
 
 {
 	InitialLeft = Dimensions.Left;
+	UpdateCounter = Heigth;
 
 	Length = 1;
 	Heigth = Dimensions.Bottom - Dimensions.Top;
@@ -18,12 +20,17 @@ MatrixString::MatrixString(SMALL_RECT dimensions, bool growth)
 	unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
 
 	std::default_random_engine gen(seed);
-	std::uniform_int_distribution<int> distrbution(33,122);
+	std::uniform_int_distribution<int> distrbution(33, 122);
+	std::uniform_int_distribution<unsigned int> maxupdatedes(20, 40);
 
 	for (char& n : MainOutBuffer)
 	{
 		n = static_cast<char>(distrbution(gen));
 	}
+
+	if (Growth)
+		MaxUpdates = UpdateCounter + maxupdatedes(gen);
+
 }
 
 MatrixString::~MatrixString()
@@ -36,6 +43,24 @@ void MatrixString::Update()
 
 	if (Growth)
 	{
+
+		unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
+
+		std::default_random_engine gen(seed);
+
+		std::uniform_int_distribution<unsigned int> maindistrbution(0, (unsigned int)MainOutBuffer.size());
+		std::uniform_int_distribution<int> chardistrbution(33, 122);
+
+		MainOutBuffer[maindistrbution(gen)] = static_cast<char>(chardistrbution(gen));
+		MainOutBuffer[maindistrbution(gen)] = static_cast<char>(chardistrbution(gen));
+
+		if (Dimensions.Bottom != MAX_Y + 1)
+		{
+			MainOutBuffer.push_back(static_cast<char>(chardistrbution(gen)));
+			Dimensions.Bottom++;
+			Heigth++;
+			UpdateCounter++;
+		}
 
 
 
@@ -64,6 +89,15 @@ void MatrixString::Update()
 
 		Dimensions.Bottom--;
 		Heigth--;
+
+		if (Growth)
+		{
+			std::reverse(MainOutBuffer.begin(), MainOutBuffer.end());
+			MainOutBuffer.pop_back();
+			std::reverse(MainOutBuffer.begin(), MainOutBuffer.end());
+			Heigth--;
+			Dimensions.Top++;
+		}
 
 		if (MainOutBuffer.empty())
 		{

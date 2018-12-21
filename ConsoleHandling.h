@@ -1,9 +1,5 @@
 #pragma once
 
-#include <algorithm>
-#include <iterator>
-#include <iostream>
-
 #include "Utility.h"
 #include "TextWindow.h"
 #include "MenuWindow.h"
@@ -12,11 +8,10 @@
 #include "Input.h"
 
 
-class ConsoleHandling : 
+class ConsoleHandling :
 	public Input
 {
 private:
-
 
 	std::vector<TextWindow*>		pTextWindows;
 	std::vector<MenuWindow*>		pMenuWindows;
@@ -36,13 +31,13 @@ private:
 									_hConsoleOut,
 									hConsoleIn;
 	
-	OutBuffer MainOutBuffer;
+	OutBuffer						MainOutBuffer;
 
-	std::vector<ON_KEY_PRESS_CALLBACK_FUNC> EntityCallbacks;
+	std::vector<bool>				ActiveEntitys;
 
-	std::vector<bool> ActiveEntitys;
+	std::vector<COLOR_INFO>			Attributes;
 
-	std::vector<COLOR_INFO> Attributes;
+	std::vector<SHORT>				UsedXPos;
 
 	DWORD dwSize,
 		  RecordsRead,
@@ -60,7 +55,7 @@ public:
 	void AddWindow(TextWindow*);
 	void AddWindow(MenuWindow*);
 	void AddWindow(GraphicWindow*);
-	void AddMatrixStrings(unsigned int);
+	void AddMatrixStrings(unsigned int, bool);
 	
 
 	void Update();
